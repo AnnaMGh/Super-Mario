@@ -68,23 +68,24 @@ body {
 		
 			//add map with layers and collision
 			map = game.add.tilemap('level2');
+			game.stage.backgroundColor = '#000';
 			map.addTilesetImage('background_02', 'background_02');
 			map.setCollisionBetween(0,3000, true, 'solid');
 		 	map.createLayer('background');
 		 	map.createLayer('green');
 		 	layer =  map.createLayer('solid');
-    		layer.resizeWorld();
+    			layer.resizeWorld();
 
 
-    		//add music and sound
-    		music = game.add.audio('background_music');
-    		music.loop=true;
-    		music.play()
-    		coins_sound = game.add.audio('coins_sound');
-    		squeeze_sound = game.add.audio('squeeze_sound');
+			//add music and sound
+			music = game.add.audio('background_music');
+			music.loop=true;
+			music.play()
+			coins_sound = game.add.audio('coins_sound');
+			squeeze_sound = game.add.audio('squeeze_sound');
 
-    		//add coins
-    		coins = game.add.group();
+			//add coins
+			coins = game.add.group();
 			coins.enableBody = true;
 			map.createFromTiles(1021, null, 'coin', 'stuff', coins);
 			coins.callAll('animations.add', 'animations', 'spin', [0, 1, 2 ], 3, true);
