@@ -7,145 +7,251 @@
 body {
 	margin: 0;
 	padding: 0;
-	background-color: #000;
+	background-color: #255;
 }
 </style>
-<script src="//cdn.jsdelivr.net/phaser/2.6.2/phaser.min.js"></script>
+<script src="phaser.min.js"></script>
 </head>
 <body>
+
 	<script type="text/javascript">
-		var game = new Phaser.Game(256, 240, Phaser.CANVAS, '', {
+	var game = new Phaser.Game(1350, 480, Phaser.CANVAS, '', {
 			preload : preload,
 			create : create,
 			update : update
 		}, false, false);
 
-		function preload() {
+
+		function preload() 
+		{
 
 			//  We need this because the assets are on github pages
 			//  Remove the next 2 lines if running locally
 			this.load.baseURL = 'https://AnnaMGh.github.io/Super-Mario/';
 			this.load.crossOrigin = 'anonymous';
 
-			this.load.spritesheet('tiles', 'assets/super_mario_tiles.png', 16,
-					16);
-			this.load.spritesheet('goomba', 'assets/goomba.png', 16, 16);
-			this.load.spritesheet('mario', 'assets/mario.png', 16, 16);
-			this.load.spritesheet('coin', 'assets/coin.png', 16, 16);
+			this.load.spritesheet('background_02', 'assets/background_02.png', 32,32);
+			this.load.spritesheet('coin', 'assets/coins_32px.png', 32,32);
+			this.load.spritesheet('gmushroom', 'assets/green_mushroom_32px.png', 32,32);
+			this.load.spritesheet('rmushroom', 'assets/red_mushroom_32px.png', 32,32);
+			this.load.spritesheet('mario', 'assets/mario_32px.png', 32,32);
+			this.load.spritesheet('mario_life', 'assets/mario_life_32px.png', 32,32);
+			this.load.tilemap('level2','assets/level_04.json', null, Phaser.Tilemap.TILED_JSON);
+			this.load.audio('background_music', ['audio/bmusic_01.mp3', 'audio/bmusic_01.ogg']);
+			this.load.audio('coins_sound', 'audio/coins_sound.mp3');
+			this.load.audio('squeeze_sound', 'audio/squeeze_sound.mp3');
 
-			this.load.tilemap('level', 'assets/super_mario_map.json', null,
-					Phaser.Tilemap.TILED_JSON);
+			
 		}
 
-		function create() {
-			Phaser.Canvas.setImageRenderingCrisp(game.canvas)
+		var map;
+		var layer;
+		var scoreText;	
+		var lifeText;
+		var score = 0;
+		var bonus =0;
+		var life = 1;
+		var checkLife = true;
+		
+			
+		function create() 
+		{
+
+			//resize
+			Phaser.Canvas.setImageRenderingCrisp(game.canvas);
 			game.scale.pageAlignHorizontally = true;
-			game.scale.pageAlignVertically = true
+			game.scale.pageAlignVertically = true;
 			game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 			game.physics.startSystem(Phaser.Physics.ARCADE);
+			game.stage.backgroundColor = '#5c94fc';
 
-			//game.stage.backgroundColor = '#5c94fc';
-			game.stage.backgroundColor = '#ff3333';
+		
+			//add map with layers and collision
+			map = game.add.tilemap('level2');
+			map.addTilesetImage('background_02', 'background_02');
+			map.setCollisionBetween(0,3000, true, 'solid');
+		 	map.createLayer('background');
+		 	map.createLayer('green');
+		 	layer =  map.createLayer('solid');
+    		layer.resizeWorld();
 
-			map = game.add.tilemap('level');
-			map.addTilesetImage('tiles', 'tiles');
-			map.setCollisionBetween(3, 12, true, 'solid');
 
-			map.createLayer('background');
+    		//add music and sound
+    		music = game.add.audio('background_music');
+    		music.loop=true;
+    		music.play()
+    		coins_sound = game.add.audio('coins_sound');
+    		squeeze_sound = game.add.audio('squeeze_sound');
 
-			layer = map.createLayer('solid');
-			layer.resizeWorld();
-
-			coins = game.add.group();
+    		//add coins
+    		coins = game.add.group();
 			coins.enableBody = true;
-			map.createFromTiles(2, null, 'coin', 'stuff', coins);
-			coins.callAll('animations.add', 'animations', 'spin',
-					[ 0, 0, 1, 2 ], 3, true);
+			map.createFromTiles(1021, null, 'coin', 'stuff', coins);
+			coins.callAll('animations.add', 'animations', 'spin', [0, 1, 2 ], 3, true);
 			coins.callAll('animations.play', 'animations', 'spin');
 
-			goombas = game.add.group();
-			goombas.enableBody = true;
-			map.createFromTiles(1, null, 'goomba', 'stuff', goombas);
-			goombas.callAll('animations.add', 'animations', 'walk', [ 0, 1 ],
-					2, true);
-			goombas.callAll('animations.play', 'animations', 'walk');
-			goombas.setAll('body.bounce.x', 1);
-			goombas.setAll('body.velocity.x', -20);
-			goombas.setAll('body.gravity.y', 500);
+			//add life
+			mlife = game.add.group();
+			mlife.enableBody = true;
+			map.createFromTiles(1020, null, 'mario_life', 'stuff', mlife);
+			mlife.callAll('animations.add', 'animations', 'anim', [0, 1, 2, 1], 3, true);
+			mlife.callAll('animations.play', 'animations', 'anim');
 
-			player = game.add.sprite(16, game.world.height - 48, 'mario');
+			//add green mushrooms
+			gmushrooms = game.add.group();
+			gmushrooms.enableBody = true;
+			map.createFromTiles(1022, null, 'gmushroom', 'stuff', gmushrooms);
+			gmushrooms.callAll('animations.add', 'animations', 'walk', [0,1], 2, true);
+			gmushrooms.callAll('animations.play', 'animations', 'walk');
+			gmushrooms.setAll('body.bounce.x', 1);
+			gmushrooms.setAll('body.velocity.x', -35);
+			gmushrooms.setAll('body.gravity.y', 500);
+
+			//add red mushrooms
+			rmushrooms = game.add.group();
+			rmushrooms.enableBody = true;
+			map.createFromTiles(1023, null, 'rmushroom', 'stuff', rmushrooms);
+			rmushrooms.callAll('animations.add', 'animations', 'walk', [0,1],
+				2, true);
+			rmushrooms.callAll('animations.play', 'animations', 'walk');
+			rmushrooms.setAll('body.bounce.x', 1);
+			rmushrooms.setAll('body.velocity.x', -25);
+			rmushrooms.setAll('body.gravity.y', 500);
+
+			//add player
+			player = game.add.sprite(0, 0, 'mario');
 			game.physics.arcade.enable(player);
-			player.body.gravity.y = 370;
+			player.body.gravity.y = 350;
 			player.body.collideWorldBounds = true;
-			player.animations.add('walkRight', [ 1, 2, 3 ], 10, true);
-			player.animations.add('walkLeft', [ 8, 9, 10 ], 10, true);
+			player.animations.add('walkRight', [ 1, 2], 10, true);
+			player.animations.add('walkLeft', [ 7, 8], 10, true);
+			player.animations.add('whenHit1', [6, 4], 10, true);
 			player.goesRight = true;
-
 			game.camera.follow(player);
-
 			cursors = game.input.keyboard.createCursorKeys();
+
+			map.createLayer('ground');
+
+			scoreText = game.add.text(16, 16, 'Score: ' + score  +'		Bonus: '+ bonus +'		Life: ' + life, { font: "32px Arial", fill: "#ffffff", align: "center" });
+ 			scoreText.fixedToCamera = true;
+   			scoreText.cameraOffset.setTo(16, 16);
+
 		}
 
 		function update() {
+			
 			game.physics.arcade.collide(player, layer);
-			game.physics.arcade.collide(goombas, layer);
-			game.physics.arcade.overlap(player, goombas, goombaOverlap);
+			game.physics.arcade.collide(rmushrooms, layer);
+			game.physics.arcade.collide(gmushrooms, layer);
+			
+			if(checkLife == true)
+			{
+				game.physics.arcade.overlap(player, gmushrooms, mushroomOverlap);
+				game.physics.arcade.overlap(player, rmushrooms, mushroomOverlap);
+			}
+			
 			game.physics.arcade.overlap(player, coins, coinOverlap);
+			game.physics.arcade.overlap(player, mlife, lifeOverlap);
 
-			if (player.body.enable) {
+			if (player.body.enable)
+			{
 				player.body.velocity.x = 0;
-				if (cursors.left.isDown) {
-					player.body.velocity.x = -90;
+				if (cursors.left.isDown)
+				{
+					player.body.velocity.x = -130;
 					player.animations.play('walkLeft');
 					player.goesRight = false;
-				} else if (cursors.right.isDown) {
-					player.body.velocity.x = 90;
+				}
+				else if (cursors.right.isDown) 
+				{
+					player.body.velocity.x = 130;
 					player.animations.play('walkRight');
 					player.goesRight = true;
-				} else {
+				}
+				else
+				{
 					player.animations.stop();
 					if (player.goesRight)
 						player.frame = 0;
 					else
-						player.frame = 7;
+						player.frame = 0; 
 				}
 
 				if (cursors.up.isDown && player.body.onFloor()) {
-					player.body.velocity.y = -190;
+					player.body.velocity.y = -220;
 					player.animations.stop();
 				}
 
 				if (player.body.velocity.y != 0) {
 					if (player.goesRight)
-						player.frame = 5;
+						player.frame = 3;
 					else
-						player.frame = 12;
+						player.frame = 9;
 				}
+
+				if(checkLife==false)
+				{
+					player.animations.stop();
+					player.animations.play('whenHit1');
+					scoreText.text = 'In animations';
+				}
+
+			
 			}
+
 		}
 
+		
+
 		function coinOverlap(player, coin) {
+			coins_sound.play();
+			score += 1;
+    		scoreText.text = 'Score: ' + score + '		Bonus: '+ bonus +'		Life: ' + life;
 			coin.kill();
 		}
 
-		function goombaOverlap(player, goomba) {
-			if (player.body.touching.down) {
-				goomba.animations.stop();
-				goomba.frame = 2;
-				goomba.body.enable = false;
-				player.body.velocity.y = -80;
-				game.time.events.add(Phaser.Timer.SECOND, function() {
-					goomba.kill();
-				});
-			} else {
-				player.frame = 6;
-				player.body.enable = false;
-				player.animations.stop();
-				game.time.events.add(Phaser.Timer.SECOND * 3, function() {
-					game.paused = true;
-				});
-			}
+		function lifeOverlap(player, mlife)
+		{
+			life++;
+			scoreText.text = 'Score: ' + score + '		Bonus: '+ bonus +'		Life: ' + life;
+			mlife.kill();
 		}
-	</script>
+
+		function mushroomOverlap(player, mushroom)
+		{
+			if (player.body.touching.down) {
+				mushroom.animations.stop();
+				squeeze_sound.play();
+				mushroom.frame = 2;
+				mushroom.body.enable = false;
+				player.body.velocity.y = -80;
+				bonus += 2;
+    			scoreText.text = 'Score: ' + score + '		Bonus: '+ bonus +'		Life: ' + life;
+				game.time.events.add(Phaser.Timer.SECOND, function() {
+					mushroom.kill();
+				});
+			} 
+			else if(player.body.touching.down==false && life>0)
+			{
+					life--;
+					scoreText.text = 'Score: ' + score + '		Bonus: '+ bonus +'		Life: ' + life;
+					checkLife = false;
+					
+					game.time.events.add(Phaser.Timer.SECOND * 3, function() {checkLife=true;});
+			}
+			else if(player.body.touching.down==false && life==0)
+			{
+					checkLife==false;
+					scoreText.text = 'Score: ' + score + '		Bonus: '+ bonus +'		Life: ' + life + '\n\tYOU DIED!';
+					life--;
+					music.stop();
+					player.frame = 6;
+					player.body.enable = false;
+					player.animations.stop();
+					game.time.events.add(Phaser.Timer.SECOND * 3, function() {game.paused = true;});
+			}
+			
+		}
+	</script> 
 </body>
 </html>
