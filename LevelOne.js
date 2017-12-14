@@ -290,14 +290,17 @@
 
 	function checkbuttons()
 	{
+		
+		menu1.visible = false;
+		menu2.visible = true;
+		
 		if(game.paused == true) {play.visible=true; pausebtn.visible = false;}
 		else {pausebtn.visible=true; play.visible= false;}
 		
 		if(game.sound.mute == true) {music1.visible=true; music2.visible = false;}
 		else {music2.visible=true; music1.visible = false;}
 		
-		menu1.visible = false;
-		menu2.visible = true;
+		
 		
 		pausebtn.events.onInputUp.add(function(){game.paused = true; pausebtn.visible = false; play.visible = true;});
 		play.events.onInputUp.add(function(){ game.paused = false; pausebtn.visible = true; 	play.visible = false;});
