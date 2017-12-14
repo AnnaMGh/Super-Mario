@@ -14,7 +14,7 @@
 		this.load.baseURL = 'https://annamgh.github.io/Super-Mario/';
 		this.load.crossOrigin = 'anonymous';
 		
-		this.load.spritesheet('background_02', 'assets/background_02.png', 32,32);
+		this.load.spritesheet('background_02', 'assets/background_levelOne.png', 32,32);
 		this.load.spritesheet('coin', 'assets/coins_32px.png', 32,32);
 		this.load.spritesheet('star', 'assets/star_32px.png', 32,32);
 		this.load.spritesheet('gmushroom', 'assets/green_mushroom_32px.png', 32,32);
@@ -27,7 +27,7 @@
 		this.load.spritesheet('play', 'assets/play_btn_32px.png', 32,32);
 		this.load.spritesheet('musicon', 'assets/musicon_btn_32px.png', 32,32);
 		this.load.spritesheet('musicoff', 'assets/musicoff_btn_32px.png', 32,32);
-		this.load.tilemap('level1','assets/levelOne.json', null, Phaser.Tilemap.TILED_JSON);
+		this.load.tilemap('level1','assets/map_lvlOne.json', null, Phaser.Tilemap.TILED_JSON);
 		this.load.audio('background_music', ['audio/bmusic_01.mp3', 'audio/bmusic_01.ogg']);
 		this.load.audio('coins_sound', 'audio/coins_sound.mp3');
 		this.load.audio('squeeze_sound', 'audio/squish_sound.mp3');
