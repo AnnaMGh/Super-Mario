@@ -50,8 +50,6 @@
 
 	function create() 
 	{
-
-		//window.alert('In create!');
 		//resize
 		Phaser.Canvas.setImageRenderingCrisp(game.canvas);
 		game.scale.pageAlignHorizontally = true;
@@ -200,7 +198,7 @@
 		music1.inputEnabled = true;
 		music1.visible = false;
 		
-		menu1.events.onInputUp.add(checkbuttons);
+		menu1.events.onInputUp.add(checkButtons);
 	}
 
 	function update() 
@@ -301,9 +299,12 @@
 
 	}
 
-	function checkbuttons()
+	function checkButtons()
 	{
-		if(game.paused == true) {play.visible=true; pausebtn.visible = false;}
+		//if(game.paused == true) {play.visible=true; pausebtn.visible = false;}
+		//else {pausebtn.visible=true; play.visible= false;}
+		
+		if(player.body.enable== false){play.visible=true; pausebtn.visible = false;}
 		else {pausebtn.visible=true; play.visible= false;}
 		
 		if(game.sound.mute == true) {music1.visible=true; music2.visible = false;}
@@ -312,8 +313,22 @@
 		menu1.visible = false;
 		menu2.visible = true;
 		
-		pausebtn.events.onInputUp.add(function(){game.paused = true; pausebtn.visible = false; play.visible = true;});
-		play.events.onInputUp.add(function(){ game.paused = false; pausebtn.visible = true; 	play.visible = false;});
+		pausebtn.events.onInputUp.add(function()
+		{
+			this.game.physics.arcade.isPaused=true;
+			player.body.enable = false;
+			game.sound.mute=true;
+			//game.paused = true;
+			pausebtn.visible = false; play.visible = true;
+		});
+		play.events.onInputUp.add(function()
+		{
+			this.game.physics.arcade.isPaused=false;
+			player.body.enable = true;
+			game.sound.mute=false;
+			//game.paused = false; 
+			pausebtn.visible = true; 	play.visible = false;
+		});
 		music1.events.onInputUp.add(function(){ game.sound.mute = false; music2.visible = true; music1.visible=false;});
 		music2.events.onInputUp.add(function(){ game.sound.mute = true; music1.visible = true; music2.visible=false;});
 		menu2.events.onInputUp.add(function(){ pausebtn.visible=false; play.visible = false; 
