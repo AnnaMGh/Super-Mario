@@ -56,8 +56,6 @@
 		game.scale.pageAlignVertically = true;
 		game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 		game.physics.startSystem(Phaser.Physics.ARCADE);
-		//game.stage.backgroundColor = '#5c94fc';
-
 		
 		//add map with layers and collision
 		map = game.add.tilemap('level1');
@@ -110,7 +108,7 @@
 		gmushrooms.callAll('animations.add', 'animations', 'walk', [0,1], 2, true);
 		gmushrooms.callAll('animations.play', 'animations', 'walk');
 		gmushrooms.setAll('body.bounce.x', 1);
-		gmushrooms.setAll('body.velocity.x', -35);
+		gmushrooms.setAll('body.velocity.x', -60);
 		gmushrooms.setAll('body.gravity.y', 500);
 
 		//add red mushrooms
@@ -121,7 +119,7 @@
 			2, true);
 		rmushrooms.callAll('animations.play', 'animations', 'walk');
 		rmushrooms.setAll('body.bounce.x', 1);
-		rmushrooms.setAll('body.velocity.x', -25);
+		rmushrooms.setAll('body.velocity.x', -50);
 		rmushrooms.setAll('body.gravity.y', 500);
 
 		//add player
@@ -233,7 +231,7 @@
 				}
 				else
 				{	
-					player.body.velocity.x = -130;
+					player.body.velocity.x = -180;
 					player.animations.play('walkLeft');
 					player.goesRight = false;
 				}
@@ -248,7 +246,7 @@
 				}
 				else
 				{
-					player.body.velocity.x = 130;
+					player.body.velocity.x = 180;
 					player.animations.play('walkRight');
 					player.goesRight = true;
 				}
